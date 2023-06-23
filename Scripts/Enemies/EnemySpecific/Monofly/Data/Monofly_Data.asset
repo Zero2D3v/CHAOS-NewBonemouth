@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10c1baa5949f0b245a97c2e1f7f64eea, type: 3}
+  m_Name: Monofly_Data
+  m_EditorClassIdentifier: 
+  attackRadius: 0.5
+  attackDamage: 2
+  maxHealth: 5
+  hitParticle: {fileID: 934923086164944426, guid: 381147f1740e7344595da5fe15d31497, type: 3}
+  whatisPlayer:
+    serializedVersion: 2
+    m_Bits: 64
+  stunResistance: 1
+  stunRecoveryTime: 0.6
+  stunTime: 0.6
+  stunKnockbackTime: 0.2
+  stunKnockbackSpeed: 0
+  stunCritKnocbackSpeed: 20
+  stunKnockbackAngle: {x: 0, y: 0}
