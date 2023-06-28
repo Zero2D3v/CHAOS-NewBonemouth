@@ -5,12 +5,14 @@ using UnityEngine;
 using static UnityEditor.PlayerSettings;
 using static UnityEngine.EventSystems.EventTrigger;
 
+//base enemy class with main shared functionalities for different enemies to inherit from
 public class Entity : MonoBehaviour
 {
+    //reference finite state machine script
     public FiniteStateMachine stateMachine;
-
+    //reference scriptable object data for enemy type base stats
     public Data_Entity entityData;
-
+    //reference components
     public int facingDirection { get; private set; }
     public Rigidbody2D rb { get; private set; }
     public Animator anim { get; private set; }
@@ -40,7 +42,9 @@ public class Entity : MonoBehaviour
     private float currentStunResistance;
     private float lastDamageTime;
 
+    //enemy random number to hit(d20) reference
     public RandomNumber RN;
+    //player random number to hit(d20) reference
     public RandomNumber PRN;
     public PlayerController playerInCombat;
     public PlayerStats PS;
@@ -53,25 +57,15 @@ public class Entity : MonoBehaviour
     protected bool isDead;
     protected bool isDissolving;
 
-    //public bool isEnemyBetweenPlayer;
-
-   // protected bool isGrounded;
-
-    //public Transform player;
-   // public float jumpDistance = 5f;
-   // public float jumpForce = 5f;
-   // public LayerMask obstacleLayer;
-    //public float movementSpeed = 2f;
-    //public float rotationSpeed = 5f;
-
-    //private Rigidbody2D rb;
     public Collider2D enemyCollider;
 
     public virtual void Start()
     {
+        //set references and starting values
         facingDirection = 1;
         currentHealth = entityData.maxHealth;
         currentStunResistance = entityData.stunResistance;
+        
         fade = 1f;
 
         RN = GetComponent<RandomNumber>();
@@ -87,12 +81,10 @@ public class Entity : MonoBehaviour
         material = aliveGO.GetComponent<SpriteRenderer>().material;
 
         SetFloat();
-
-
-
+        //create instance of state machine
         stateMachine = new FiniteStateMachine();
     }
-
+    //set dissolve shader slider to value 1
     public virtual void SetFloat()
     {
         material.SetFloat("_Fade", fade);
@@ -100,15 +92,14 @@ public class Entity : MonoBehaviour
 
     public virtual void Update()
     {
+        //make follow state machine logic
         stateMachine.currentState.LogicUpdate();
-
-        anim.SetFloat("yVelocity", rb.velocity.y);
-
+        //reset stun resistance, set up so stun health is 1 so each hit means stun state animation - more like enemy hit state
         if(Time.time >= lastDamageTime + entityData.stunRecoveryTime)
         {
             ResetStunResistance();
         }
-
+        //on death dissolve shader activated, die at end of dissolve
         if (isDissolving)
         {
             fade -= Time.deltaTime/4;
@@ -124,49 +115,22 @@ public class Entity : MonoBehaviour
                 }
             }
             material.SetFloat("_Fade", fade);
-        }
-
-
-        
+        }  
     }
 
-    
+    //physics events handled in fixed update so no stutter
     public virtual void FixedUpdate()
     {
         stateMachine.currentState.PhysicsUpdate();
 
-
-      // if (player)
-      // {
-      //     // Check if there is an obstacle (another enemy) between the enemy and the player
-      //     Collider2D[] obstacles = Physics2D.OverlapCircleAll(ledgeCheck.position, jumpDistance, obstacleLayer);
-      //
-      //     foreach (Collider2D obstacle in obstacles)
-      //     {
-      //         if (obstacle.CompareTag("Player") || obstacle == enemyCollider)
-      //         {
-      //             continue;
-      //         }
-      //
-      //         // Calculate the jump direction
-      //         Vector2 jumpDirection = Vector2.right * facingDirection;
-      //
-      //         // Jump behind the player
-      //          rb.velocity = new Vector2(jumpDirection.x * 0.1f * jumpForce ,0.1f * jumpForce);//AddForce(jumpDirection * jumpForce, ForceMode2D.Impulse);
-      //         rb.AddForce(Vector2.up * jumpForce);
-      //         break; // Only jump once
-      //     }
-      //     //ledgecheck.position
-      // }
-
     }
-
+    //enemy damage hop function for visual feedback, if crit by player then increase
     public virtual void DamageHop(float velocity)
     {
         velocityWorkspace.Set(rb.velocity.x, velocity);
         rb.velocity = velocityWorkspace;
     }
-
+    //reset stun health
     public virtual void ResetStunResistance()
     {
         isStunned = false;
@@ -175,28 +139,32 @@ public class Entity : MonoBehaviour
 
     public virtual void Damage (AttackDetails attackDetails)
     {
+        //only damage if not dead
        if (currentHealth >= 0)
        {
+            //for stun reset 
             lastDamageTime = Time.time;
-
+            //records player in combat for other enemies
             playerInCombat.inCombat = true;
-
+            //check working
             Debug.Log("player in combat");
-
+            //add remove from combat to queue
             PCC.Invoke("RemoveFromCombat", 0.6f);
-
+            //do damage
             currentHealth -= attackDetails.damageAmount;
+            //check correct amount
             Debug.Log("minus" + attackDetails.damageAmount);
+            //minus stun damage
             currentStunResistance -= attackDetails.stunDamageAmount;
-
+            //update UI enemy healthbar
             healthbar.UpdateHealth(currentHealth / entityData.maxHealth);
-
+            //enemy knockback
             DamageHop(entityData.damageHopSpeed);
-
+            //spawn hitmarker
             Instantiate(entityData.hitParticle, hitMarker.position, Quaternion.Euler(0f, 0f, 0f));
-
+            //show damage as animated pop up prefab
             ShowDamage(attackDetails.damageAmount.ToString());
-
+            //record direction of attack
             if (attackDetails.position.x > aliveGO.transform.position.x)
             {
                 lastDamageDirection = -1;
@@ -205,27 +173,24 @@ public class Entity : MonoBehaviour
             {
                 lastDamageDirection = 1;
             }
-
+            //record if stunned
             if (currentStunResistance <= 0)
             {
                 isStunned = true;
             }
             if (currentHealth <= 0)
             {
-                //Die();
+                //record if dead
                 isDead = true;
+                //start dissolve shader transition to value 0
                 isDissolving = true;
+                //player gain xp
                 gameController.OnDeathXP();
             }
         }
         
     }
-
-    //public virtual void DisableHitMarker()
-   // {
-      //  entityData.hitParticle.SetActive(false);
-   // }
-
+    //damage pop up floating text offset to be above hitmarker and enemy
     public virtual void ShowDamage(string text)
     {
         if (floatingTextPrefab)
@@ -234,7 +199,7 @@ public class Entity : MonoBehaviour
             prefab.GetComponent<TextMeshPro>().text = text;
         }
     }
-
+    //same as damage pop up but reads miss
     public virtual void ShowMiss(string text)
     {
         if (currentHealth >= 0)
@@ -247,39 +212,39 @@ public class Entity : MonoBehaviour
         }
         
     }
-
+    //flip function using sprite rotation instead of local scale so as not to effect other components
     public virtual void Flip()
     {
         facingDirection *= -1;
         aliveGO.transform.Rotate(0f, 180f, 0f);
 
     }
-
+    //die function destroys game object so enemy array count lowered
     public virtual void Die()
     {
         
         Destroy(gameObject);
         Debug.Log("die");
     }
-
+    //drops healthdrop prefab
     public virtual void DropHealth()
     {
         Instantiate(entityData.healthDrop, aliveGO.transform.position, Quaternion.identity);
     }
-
+    //velocity used for general movement, stopping and charge state
     public virtual void SetVelocity(float velocity)
     {
         velocityWorkspace.Set(facingDirection * velocity, rb.velocity.y);
         rb.velocity  = velocityWorkspace;
     }
-
+    //velocity used for knockback function and dodge state
     public virtual void SetVelocity(float velocity, Vector2 angle, int direction)
     {
         angle.Normalize();
         velocityWorkspace.Set(angle.x * velocity * direction, angle.y * velocity);
         rb.velocity = velocityWorkspace;
     }
-
+    //raycast checks
     public virtual bool CheckWall()
     {
         return Physics2D.Raycast(wallCheck.position, aliveGO.transform.right, entityData.wallCheckDistance, entityData.whatIsGround);
@@ -309,45 +274,14 @@ public class Entity : MonoBehaviour
     {
         return Physics2D.Raycast(playerCheck.position, aliveGO.transform.right, entityData.closeRangeActionDistance, entityData.whatIsPlayer);
     }
-
- //  public virtual void CheckEnemyBetweenPlayer()
- //  {
- //       //Check if there is an obstacle (another enemy) between the enemy and the player
- //           Collider2D[] obstacles = Physics2D.OverlapCircleAll(ledgeCheck.position, jumpDistance, obstacleLayer);
- //      
- //           foreach (Collider2D obstacle in obstacles)
- //           {
- //               if (obstacle.CompareTag("Player") || obstacle == enemyCollider)
- //               {
- //                   continue;
- //               }
- //               isEnemyBetweenPlayer = true;
- //
- //
- //          // Calculate the jump direction
- //          // Vector2 jumpDirection = Vector2.right * facingDirection;
- //
- //          // Jump behind the player
- //          // rb.velocity = new Vector2(jumpDirection.x * 0.1f * jumpForce ,0.1f * jumpForce);//AddForce(jumpDirection * jumpForce, ForceMode2D.Impulse);
- //          // rb.AddForce(Vector2.up * jumpForce);
- //          // break; // Only jump once
- //      }
- //           //ledgecheck.position
- //  }
-
-
+    //draw gizmos to see checks
     public virtual void OnDrawGizmos()
     {
         Gizmos.DrawLine(wallCheck.position, wallCheck.position + (Vector3)(Vector2.right * facingDirection * entityData.wallCheckDistance));
         Gizmos.DrawLine(ledgeCheck.position, ledgeCheck.position + (Vector3)(Vector2.down * entityData.ledgeCheckDistance));
-        //Gizmos.DrawLine(playerCheck.position, playerCheck.position + (Vector3)(Vector2.right * facingDirection * entityData.minAgroDistance));
 
         Gizmos.DrawWireSphere(playerCheck.position + (Vector3)(Vector2.right * facingDirection * entityData.closeRangeActionDistance), 0.2f);
         Gizmos.DrawWireSphere(playerCheck.position + (Vector3)(Vector2.right * facingDirection * entityData.minAgroDistance), 0.2f);
-        Gizmos.DrawWireSphere(playerCheck.position + (Vector3)(Vector2.right * facingDirection * entityData.maxAgroDistance), 0.2f);
-
-        //Gizmos.color = Color.red;
-        //Gizmos.DrawWireSphere(ledgeCheck.position, jumpDistance);
-        
+        Gizmos.DrawWireSphere(playerCheck.position + (Vector3)(Vector2.right * facingDirection * entityData.maxAgroDistance), 0.2f);   
     }
 }

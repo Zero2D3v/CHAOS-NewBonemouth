@@ -2,11 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//enemy specific melee attack state
 public class E2_MeleeAttackState : MeleeAttackState
 {
+    //declare enemy
     private Enemy2 enemy;
+    //inherited constructor with added necessary components
     public E2_MeleeAttackState(Entity entity, FiniteStateMachine stateMachine, string animBoolName, Transform attackPosition, Data_MeleeAttackState stateData, Enemy2 enemy) : base(entity, stateMachine, animBoolName, attackPosition, stateData)
     {
+        //this instance set to declared enemy
         this.enemy = enemy;
     }
 
@@ -34,6 +38,7 @@ public class E2_MeleeAttackState : MeleeAttackState
     {
         base.LogicUpdate();
 
+        //changes state based on inherited values
         if (isAnimationFinished)
         {
             if (isPlayerInMinAggroRange)

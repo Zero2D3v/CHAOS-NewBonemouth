@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//trigger script attached to health drop prefab, communicates with game controller for simplicity
 public class HealthPickUp : MonoBehaviour
 {
     public GameController gameManager;

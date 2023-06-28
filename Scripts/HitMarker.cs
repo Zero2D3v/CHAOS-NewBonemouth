@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//script responsible for controlling hitmarker prefab
 public class HitMarker : MonoBehaviour
 {
     public GameObject hitMarker;

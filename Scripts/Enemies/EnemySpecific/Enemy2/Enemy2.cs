@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
 
+//2nd enemy type inheriting from base entity class, same as enemy1 specific script but with long range attack state and dodge state added
+//see Enemy1 script
 public class Enemy2 : Entity
 {
     public E2_MoveState moveState { get; private set; }
@@ -101,12 +103,10 @@ public class Enemy2 : Entity
     public override void Die()
     {
         base.Die();
-        //temp
+
         gameController.CheckLastManStanding();
 
         gameController.duoRemaining -= 1;
-
-        
 
         if (gameController.lastManStanding)
         {

@@ -2,12 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//enemy specific charge state
 public class E1_ChargeState : ChargeState
 {
+    //declare enemy
     private Enemy1 enemy;
-
+    //inherited constructor with added necessary components
     public E1_ChargeState(Entity entity, FiniteStateMachine stateMachine, string animBoolName, Data_ChargeState stateData, Enemy1 enemy) : base(entity, stateMachine, animBoolName, stateData)
     {
+        //this instance set to declared enemy
         this.enemy = enemy;
     }
 
@@ -30,6 +33,7 @@ public class E1_ChargeState : ChargeState
     {
         base.LogicUpdate();
 
+        //changes state based on inherited values
         if (performCloseRangeAction)
         {
             stateMachine.ChangeState(enemy.meleeAtackState);

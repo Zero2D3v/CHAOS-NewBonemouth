@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Enemy1 : Entity
 {
+    //reference enemy1 states inherited from the base states
     public E1_IdleState idleState { get; private set; }
 
     public E1_MoveState moveState { get; private set; }
@@ -20,7 +21,7 @@ public class Enemy1 : Entity
 
     public E1_DeadState deadState { get; private set; }
 
-
+    //reference data for each state from scriptable objects
     [SerializeField]
     private Data_IdleState idleStateData;
     [SerializeField]
@@ -44,7 +45,7 @@ public class Enemy1 : Entity
     public override void Start()
     {
         base.Start();
-
+        //override basestates for this enemy 1 with constructors containing references to animator strings, scriptable object data, statemachine and base scripts
         moveState = new E1_MoveState(this, stateMachine, "move", moveStateData, this);
         idleState = new E1_IdleState(this, stateMachine, "idle", idleStateData, this);
         playerDetectedState = new E1_PlayerDetectedState(this, stateMachine, "playerDetected", playerDetectedData, this);
@@ -53,21 +54,21 @@ public class Enemy1 : Entity
         meleeAtackState = new E1_MeleeAtackState(this, stateMachine, "meleeAttack", meleeAttackPosition, meleeAttackStateData, this);
         stunState = new E1_StunState(this, stateMachine, "stun", stunStateData, this);
         deadState = new E1_DeadState(this, stateMachine, "dead", deadStateData, this);
-
+        //start in movestate
         stateMachine.Initialize(moveState);
     }
 
     public override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
-
+        //draw attack hitbox
         Gizmos.DrawWireSphere(meleeAttackPosition.position, meleeAttackStateData.attackRadius);
     }
-
+    //damage function using struct so can be used accross enemies
     public override void Damage(AttackDetails attackDetails)
     {
         base.Damage(attackDetails);
-
+        //state machine logic for states that can be entered from any state
         if (isDead)
         {
             stateMachine.ChangeState(deadState);

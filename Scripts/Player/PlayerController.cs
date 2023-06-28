@@ -2,13 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//player controller script to handle movement and non combat functionality
 public class PlayerController : MonoBehaviour
 {
+    //declare fields
     private float movementInputDirection;
     private float knockbackStartTime;
 
     [SerializeField]
     private float knockbackDuration;
+    //not implemented player stun yet
     //[SerializeField]
    // private float stunDuration;
 
@@ -45,6 +48,7 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //set references and starting values
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         amountOfJumpsLeft = amountOfJumps;
@@ -53,6 +57,7 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //always do checks and update animations based on inupts
         CheckInput();
         CheckMovementDirection();
         UpdateAnimations();
@@ -67,6 +72,7 @@ public class PlayerController : MonoBehaviour
 
     private void CheckMovementDirection()
     {
+        //flip when necessary
         if (isFacingRight && canFlip && movementInputDirection < 0)
         {
             Flip();
@@ -75,7 +81,7 @@ public class PlayerController : MonoBehaviour
         {
             Flip();
         }
-
+        //record walking for animation purposes
         if (rb.velocity.x != 0)
         {
             isWalking = true;
@@ -84,12 +90,12 @@ public class PlayerController : MonoBehaviour
         {
             isWalking = false;
         }
-
+        //record jump
         if (Input.GetButtonDown("Jump") && (canJump = true))
         {
             isJumping = true;
         }
-        else //if (amountOfJumpsLeft >= 0)
+        else
         {
             isJumping = false;
         }
@@ -97,10 +103,11 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        //apply movement and check surroundings in fixed update to reduce clutter/jitter
         ApplyMovement();
         CheckSurroundings();
     }
-
+    //player knockback function
     public void Knockback(int direction)
     {
         knockback = true;
@@ -110,7 +117,7 @@ public class PlayerController : MonoBehaviour
         //isStunned = true;
     }
 
-
+    //record knockback checks
     private void CheckKnockback()
     {
         if(Time.time >= knockbackStartTime + knockbackDuration && knockback)
@@ -123,12 +130,12 @@ public class PlayerController : MonoBehaviour
        //     isStunned = false;
        // }
     }
-
+    //check if grounded for jump purposes
     private void CheckSurroundings()
     {
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, whatIsGround);
     }
-
+    //check and record if can jump depending on if grounded and jumps remaining for double jump
     private void CheckIfCanJump()
     {
         if (isGrounded && rb.velocity.y <= 0)
@@ -144,7 +151,7 @@ public class PlayerController : MonoBehaviour
             canJump = true;
         }
     }
-
+    //record player input
     private void CheckInput()
     {
         movementInputDirection = Input.GetAxisRaw("Horizontal");
@@ -154,7 +161,7 @@ public class PlayerController : MonoBehaviour
             Jump();
         }
     }
-
+    //function responsible for setting animations
     private void UpdateAnimations()
     {
         anim.SetBool("isWalking", isWalking);
@@ -164,7 +171,7 @@ public class PlayerController : MonoBehaviour
         //anim.SetBool("isGrounded", isGrounded);
         //anim.SetFloat("yVelocity", rb.velocity.y);
     }
-
+    //jump function applies new velocity and reduces jumps left count
     private void Jump()
     {
         if (canJump)
@@ -174,17 +181,17 @@ public class PlayerController : MonoBehaviour
         }
 
     }
-
+    //apply movement velocity based on input
     private void ApplyMovement()
     {
             rb.velocity = new Vector2(movementSpeed * movementInputDirection, rb.velocity.y);
     }
-
+    //make so cant flip , called when attacking
     public void DisableFlip()
     {
         canFlip = false;
     }
-
+    //reset after attack animation finished
     public void EnableFlip()
     {
         canFlip = true;
@@ -192,11 +199,14 @@ public class PlayerController : MonoBehaviour
 
     private void Flip()
     {
+        //invert facing direction set in start function
         facingDirection *= -1;
+        //record inversion from previous facing direction
         isFacingRight = !isFacingRight;
+        //flip object using rotation to affect child objects but if something not want to be rotated can keep unaffected using transform.rotation = quaternion.identity (unlike if using local scale to flip
         transform.Rotate(0.0f, 180f, 0.0f);
     }
-
+    //draw ground check to see
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);

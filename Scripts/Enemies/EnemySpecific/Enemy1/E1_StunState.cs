@@ -2,12 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//enemy specific stun state
 public class E1_StunState : StunState
 {
+    //declare enemy
     private Enemy1 enemy;
-
+    //inherited constructor with added necessary components
     public E1_StunState(Entity entity, FiniteStateMachine stateMachine, string animBoolName, Data_StunState stateData, Enemy1 enemy) : base(entity, stateMachine, animBoolName, stateData)
     {
+        //this instance set to declared enemy
         this.enemy = enemy;
     }
 
@@ -30,6 +33,7 @@ public class E1_StunState : StunState
     {
         base.LogicUpdate();
 
+        //changes state based on inherited values
         if (isStunTimeOver)
         {
             if (performCloseRangeAction)
@@ -42,6 +46,7 @@ public class E1_StunState : StunState
             }
             else
             {
+                //if hit from behind, immediately turn to face player
                 enemy.lookForPlayerState.SetTurnImmediately(true);
                 stateMachine.ChangeState(enemy.lookForPlayerState);
             }

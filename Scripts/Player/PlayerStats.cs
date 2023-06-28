@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class PlayerStats : MonoBehaviour
 {
-    
+    //declare fields for stats to be set in editor, and scripts and objects to call and interact with
     public float maxHealth;
     [SerializeField]
     private GameObject deathChunkParticle, deathBloodParticle;
@@ -18,8 +18,6 @@ public class PlayerStats : MonoBehaviour
     public HealthBar healthbarHUD;
 
     public GameObject canvasHUD;
-
-    //public AbilityCooldown abilityCooldown;
 
     public int Strength;
     public int Dexterity;
@@ -39,34 +37,31 @@ public class PlayerStats : MonoBehaviour
 
     private void Start()
     {
+        //set references
         currentHealth = maxHealth;
         canvas = GameObject.Find("PlayerCanvasHP");
         canvasHUD = GameObject.Find("PlayerHP");
-        DisableHealthBar();
-        //invulnerable = canvasHUD.GetComponentInChildren<AbilityCooldown>().invulnerable; 
+        //previously had healthbar over player head to become visable when take damage but since moved to health on UI player HUD
+        //DisableHealthBar(); 
     }
 
-    public void DisableHealthBar()
-    {
-        canvas.SetActive(false);
-    }
-    public void EnableHealthBar()
-    {
-        canvas.SetActive(true);
-    }
+   //public void DisableHealthBar()
+   //{
+   //    canvas.SetActive(false);
+   //}
+   //public void EnableHealthBar()
+   //{
+   //    canvas.SetActive(true);
+   //}
 
     public void DecreaseHealth(float amount)
     {
+        //apply health loss
             currentHealth -= amount;
-
-            healthbar.UpdateHealth(currentHealth / maxHealth);
-
-            //update UI HUD
+            //update UI HUD health bar and text
             healthbarHUD.UpdateHealth(currentHealth / maxHealth);
             healthbarHUD.SetHealthUI();
-        
-        
-
+        //call die function if no health
         if(currentHealth <= 0.0f)
         {
             Die();
@@ -74,33 +69,33 @@ public class PlayerStats : MonoBehaviour
     }
     public void IncreaseHealth(float amount)
     {
+        //apply health gain
         currentHealth += amount;
-
+        //cap health at max health so no over heal
         if(currentHealth >= maxHealth)
         {
             currentHealth = maxHealth;
         }
-
-        healthbar.UpdateHealth(currentHealth / maxHealth);
-
-        //update UI HUD
+        //update UI HUD health bar and text
         healthbarHUD.UpdateHealth(currentHealth / maxHealth);
         healthbarHUD.SetHealthUI();
     }
     private void Die()
     {
+        //spawn blood and chunk particles on death and destroy player game object
         Instantiate(deathChunkParticle, transform.position, deathChunkParticle.transform.rotation);
         Instantiate(deathBloodParticle, transform.position, deathBloodParticle.transform.rotation);
         Destroy(gameObject);
     }
+    //function called by level increase function in LevelEXPSystem script
     public void IncreaseMaxHealth(int level)
     {
+        //record previous max health
         previousMaxHealth = maxHealth;
-
+        //add calculated difference between prvious and new max health
         maxHealth += (currentHealth * 0.01f) * ((100 - level) * 0.1f);
-        
+        //round and set to nearest int
         maxHealth = (Mathf.Round(maxHealth / 1) * 1);
-        //healthbarHUD.SetSegments();
         Debug.Log(maxHealth);
     } 
 }

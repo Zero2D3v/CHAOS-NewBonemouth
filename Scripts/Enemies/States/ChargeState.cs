@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//charge state inherits from state
 public class ChargeState : State
 {
+    //declare fields 
     protected Data_ChargeState stateData;
 
     protected bool isPlayerInMinAgroRange;
@@ -11,9 +13,10 @@ public class ChargeState : State
     protected bool isDetectingWall;
     protected bool isChargeTimeOver;
     protected bool performCloseRangeAction;
-
+    //inherited constructor with added components
     public ChargeState(Entity entity, FiniteStateMachine stateMachine, string animBoolName, Data_ChargeState stateData) : base(entity, stateMachine, animBoolName)
     {
+        //set instance to declared data
         this.stateData = stateData;
     }
 
@@ -21,6 +24,7 @@ public class ChargeState : State
     {
         base.DoChecks();
 
+        //state specific checks
         isPlayerInMinAgroRange = entity.CheckPlayerInMinAgroRange();
         isDetectingLedge = entity.CheckLedge();
         isDetectingWall = entity.CheckWall();
@@ -31,9 +35,11 @@ public class ChargeState : State
     public override void Enter()
     {
         base.Enter();
- 
+
+        //set values
         isChargeTimeOver = false;
-        entity.SetVelocity(stateData.chargeSpeed);// * entity.facingDirection);
+        //apply charge movement using state specific data
+        entity.SetVelocity(stateData.chargeSpeed);
     }
 
     public override void Exit()
@@ -45,6 +51,7 @@ public class ChargeState : State
     {
         base.LogicUpdate();
 
+        //set value used for changing state
         if (Time.time >= startTime + stateData.chargeTime)
         {
             isChargeTimeOver = true;

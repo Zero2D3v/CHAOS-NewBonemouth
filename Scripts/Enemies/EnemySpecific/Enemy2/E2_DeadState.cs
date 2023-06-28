@@ -2,11 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//enemy specific dead state
 public class E2_DeadState : DeadState
 {
+    //declare enemy
     private Enemy2 enemy;
+    //inherited constructor with added necessary components
     public E2_DeadState(Entity entity, FiniteStateMachine stateMachine, string animBoolName, Data_DeadState stateData, Enemy2 enemy) : base(entity, stateMachine, animBoolName, stateData)
     {
+        //this instance set to declared enemy
         this.enemy = enemy;
     }
 
@@ -29,8 +33,6 @@ public class E2_DeadState : DeadState
     {
         base.FinishDeath();
 
-        //enemy.gameController.duoRemaining -= 1;
-        //enemy.DropHealth();
     }
 
     public override void LogicUpdate()

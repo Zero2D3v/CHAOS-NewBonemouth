@@ -2,11 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//enemy specific player detected state
 public class E2_PlayerDetectedState : PlayerDetectedState
 {
+    //declare enemy
     private Enemy2 enemy;
+    //inherited constructor with added necessary components
     public E2_PlayerDetectedState(Entity entity, FiniteStateMachine stateMachine, string animBoolName, Data_PlayerDetected stateData, Enemy2 enemy) : base(entity, stateMachine, animBoolName, stateData)
     {
+        //this instance set to declared enemy
         this.enemy = enemy;
     }
 
@@ -29,6 +33,7 @@ public class E2_PlayerDetectedState : PlayerDetectedState
     {
         base.LogicUpdate();
 
+        //changes state based on inherited values
         if (performCloseRangeAction)
         {
             if (Time.time >= enemy.dodgeState.startTime + enemy.dodgeStateData.dodgeCooldown)

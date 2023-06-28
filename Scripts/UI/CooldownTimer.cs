@@ -4,8 +4,10 @@ using UnityEngine;
 using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
+//script for handling player attack cooldown bar used by game controller script (composition)
 public class CooldownTimer : MonoBehaviour
 {
+    //declare fields
     public Image bar;
     public float maxTime = 0.7f;
     public float timeLeft;
@@ -13,13 +15,14 @@ public class CooldownTimer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //set reference
         bar = GetComponent<Image>();
-        //timeLeft = maxTime;
     }
 
     // Update is called once per frame
     void Update()
     {
+        //if time on timer then slowly fill bar again
         if(timeLeft > 0)
         {
             timeLeft -= Time.deltaTime;
@@ -29,17 +32,10 @@ public class CooldownTimer : MonoBehaviour
       {
           bar.fillAmount = 1f;
       }
-        
-        
-            //freeze time!!!
-            //Time.timeScale = 0;
-
-        
     }
 
   public void UpdateCooldownTime(float cooldown)
     {
         timeLeft = cooldown;
     }
-    //reset bar
 }
